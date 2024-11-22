@@ -1,0 +1,403 @@
+{
+  "service": {
+    "service": "graphql-server",
+    "serviceObject": {
+      "name": "graphql-server"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs20.x",
+      "region": "us-east-2",
+      "logs": {
+        "httpApi": true
+      },
+      "environment": {
+        "JWT_SECRET": "aQ390AdF112!ipl99",
+        "MONGODB_URI": "mongodb+srv://wyattbensman:TiOwxsJMvAp6OOo1@lifelist-dev.jtwrjgy.mongodb.net/?retryWrites=true&w=majority&appName=lifelist-dev",
+        "S3_BUCKET_NAME": "lifelist-media",
+        "CLOUDFRONT_URL": "https://d73gjs74ras0w.cloudfront.net/",
+        "NODE_ENV": "production"
+      },
+      "httpApi": {
+        "cors": {
+          "allowedOrigins": [
+            "https://studio.apollographql.com"
+          ],
+          "allowedHeaders": [
+            "Content-Type",
+            "Authorization"
+          ],
+          "allowedMethods": [
+            "OPTIONS",
+            "POST"
+          ],
+          "allowCredentials": true
+        }
+      },
+      "stage": "dev",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "GraphqlLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/graphql-server-dev-graphql"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "graphql-server",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/graphql-server-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/graphql-server-dev*:*:*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "graphql-server",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "GraphqlLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-2-73add36f-0899",
+                "S3Key": "serverless/graphql-server/dev/1732289576588-2024-11-22T15:32:56.588Z/graphql-server.zip"
+              },
+              "Handler": "server.graphqlHandler",
+              "Runtime": "nodejs20.x",
+              "FunctionName": "graphql-server-dev-graphql",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "JWT_SECRET": "aQ390AdF112!ipl99",
+                  "MONGODB_URI": "mongodb+srv://wyattbensman:TiOwxsJMvAp6OOo1@lifelist-dev.jtwrjgy.mongodb.net/?retryWrites=true&w=majority&appName=lifelist-dev",
+                  "S3_BUCKET_NAME": "lifelist-media",
+                  "CLOUDFRONT_URL": "https://d73gjs74ras0w.cloudfront.net/",
+                  "NODE_ENV": "production"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GraphqlLogGroup"
+            ]
+          },
+          "GraphqlLambdaVersionTJ6oA5qhmdQRr6yXstjzUD2GBwv6B5WDBfJ0OhBs": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GraphqlLambdaFunction"
+              },
+              "CodeSha256": "098V5PBZVMwvap+HpbVvIv2ewIHhW/p/6Xsa001QcDA="
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-graphql-server",
+              "ProtocolType": "HTTP",
+              "CorsConfiguration": {
+                "AllowCredentials": true,
+                "AllowHeaders": [
+                  "Content-Type",
+                  "Authorization"
+                ],
+                "AllowMethods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "AllowOrigins": [
+                  "https://studio.apollographql.com"
+                ]
+              }
+            }
+          },
+          "HttpApiLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/http-api/graphql-server-dev"
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              },
+              "AccessLogSettings": {
+                "DestinationArn": {
+                  "Fn::GetAtt": [
+                    "HttpApiLogGroup",
+                    "Arn"
+                  ]
+                },
+                "Format": "{\"requestId\":\"$context.requestId\",\"ip\":\"$context.identity.sourceIp\",\"requestTime\":\"$context.requestTime\",\"httpMethod\":\"$context.httpMethod\",\"routeKey\":\"$context.routeKey\",\"status\":\"$context.status\",\"protocol\":\"$context.protocol\",\"responseLength\":\"$context.responseLength\"}"
+              }
+            },
+            "DependsOn": "HttpApiLogGroup"
+          },
+          "GraphqlLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GraphqlLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationGraphql": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GraphqlLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostGraphql": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /graphql",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationGraphql"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationGraphql"
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-2-73add36f-0899",
+            "Export": {
+              "Name": "sls-graphql-server-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "GraphqlLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GraphqlLambdaVersionTJ6oA5qhmdQRr6yXstjzUD2GBwv6B5WDBfJ0OhBs"
+            },
+            "Export": {
+              "Name": "sls-graphql-server-dev-GraphqlLambdaFunctionQualifiedArn"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-graphql-server-dev-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-graphql-server-dev-HttpApiUrl"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "pluginsData": {},
+    "functions": {
+      "graphql": {
+        "handler": "server.graphqlHandler",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/graphql",
+              "method": "post"
+            },
+            "resolvedMethod": "POST",
+            "resolvedPath": "/graphql"
+          }
+        ],
+        "name": "graphql-server-dev-graphql",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs20.x",
+        "vpc": {},
+        "versionLogicalId": "GraphqlLambdaVersionTJ6oA5qhmdQRr6yXstjzUD2GBwv6B5WDBfJ0OhBs"
+      }
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless.yml",
+    "initialServerlessConfig": {
+      "service": "graphql-server",
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "package": {
+        "exclude": [
+          ".env",
+          ".gitignore",
+          "README.md"
+        ],
+        "include": [
+          "node_modules/**"
+        ],
+        "artifactsS3KeyDirname": "serverless/graphql-server/dev/code-artifacts",
+        "deploymentBucket": "serverless-framework-deployments-us-east-2-73add36f-0899",
+        "artifact": "/Users/wyattbensman/lifelist-backend/server/.serverless/graphql-server.zip",
+        "artifactDirectoryName": "serverless/graphql-server/dev/1732289576588-2024-11-22T15:32:56.588Z"
+      }
+    },
+    "appId": null,
+    "orgId": null,
+    "layers": {},
+    "artifact": "/Users/wyattbensman/lifelist-backend/server/.serverless/graphql-server.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/graphql-server/dev/1732289576588-2024-11-22T15:32:56.588Z",
+    "artifact": "graphql-server.zip"
+  }
+}
